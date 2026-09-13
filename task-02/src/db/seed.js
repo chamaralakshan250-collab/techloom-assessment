@@ -1,0 +1,244 @@
+const db = require('./db');
+
+const initialCatalog = [
+  {
+    id: 'eco-prod-101',
+    sku: 'AUDIO-ANC-01',
+    name: 'Wireless Noise-Cancelling Headphones',
+    category: 'Audio',
+    price: 149.99,
+    originalPrice: 179.99,
+    rating: 4.7,
+    reviewsCount: 86,
+    totalStock: 18,
+    reservedStock: 0,
+    badge: 'Best Seller',
+    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80',
+    description: 'Over-ear Bluetooth headphones with active noise cancellation, 30-hour battery life, and comfortable memory foam ear cushions.',
+    features: [
+      'Active Noise Cancellation (ANC)',
+      'Bluetooth 5.2 with 30-hour battery life',
+      'USB-C quick charge (10 mins for 3 hours)',
+      'Built-in microphone for calls'
+    ],
+    specs: {
+      'Battery Life': '30 Hours',
+      'Charging Port': 'USB-C',
+      'Weight': '240g',
+      'Warranty': '1 Year'
+    },
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'eco-prod-102',
+    sku: 'TECH-WATCH-02',
+    name: 'GPS Smart Fitness Watch',
+    category: 'Wearables',
+    price: 199.00,
+    originalPrice: 229.00,
+    rating: 4.6,
+    reviewsCount: 64,
+    totalStock: 12,
+    reservedStock: 0,
+    badge: 'Featured',
+    image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80',
+    description: 'Smart fitness tracker with AMOLED touch display, heart rate monitor, sleep tracking, and built-in GPS.',
+    features: [
+      '1.4-inch AMOLED touch display',
+      'Heart rate, SpO2, and sleep tracking',
+      '50m water resistance (5 ATM)',
+      '7-day battery life on single charge'
+    ],
+    specs: {
+      'Display': '1.4" AMOLED',
+      'Water Resistance': '50m (5 ATM)',
+      'Battery': 'Up to 7 days',
+      'Compatibility': 'iOS & Android'
+    },
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'eco-prod-103',
+    sku: 'DESK-KEY-03',
+    name: 'Mechanical Gaming Keyboard (75%)',
+    category: 'Peripherals',
+    price: 89.50,
+    originalPrice: 109.50,
+    rating: 4.8,
+    reviewsCount: 142,
+    totalStock: 8,
+    reservedStock: 0,
+    badge: 'Popular',
+    image: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=600&q=80',
+    description: 'Compact 75% layout mechanical keyboard with hot-swappable red linear switches and RGB backlighting.',
+    features: [
+      '75% compact 84-key layout',
+      'Hot-swappable linear switches',
+      'Customizable RGB backlighting',
+      'Detachable braided Type-C cable'
+    ],
+    specs: {
+      'Layout': '75% (84 Keys)',
+      'Switch Type': 'Red Linear',
+      'Connectivity': 'USB-C Wired',
+      'Weight': '850g'
+    },
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'eco-prod-104',
+    sku: 'CAM-LENS-04',
+    name: '35mm F1.8 Prime Camera Lens',
+    category: 'Photography',
+    price: 349.00,
+    originalPrice: 399.00,
+    rating: 4.7,
+    reviewsCount: 41,
+    totalStock: 4,
+    reservedStock: 0,
+    badge: 'Limited Stock',
+    image: 'https://images.unsplash.com/photo-1617005082133-548c4dd27f35?w=600&q=80',
+    description: 'Versatile wide-angle prime lens with bright F1.8 aperture for street photography, portraits, and low-light video.',
+    features: [
+      'Fast F1.8 maximum aperture',
+      'Quiet autofocus stepping motor',
+      'Compact and lightweight design',
+      'Multi-layer anti-reflective coating'
+    ],
+    specs: {
+      'Focal Length': '35mm',
+      'Max Aperture': 'F/1.8',
+      'Filter Size': '55mm',
+      'Weight': '280g'
+    },
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'eco-prod-105',
+    sku: 'BAG-COMM-05',
+    name: 'Everyday Commuter Backpack (24L)',
+    category: 'Accessories',
+    price: 69.00,
+    originalPrice: 85.00,
+    rating: 4.5,
+    reviewsCount: 95,
+    totalStock: 25,
+    reservedStock: 0,
+    badge: null,
+    image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&q=80',
+    description: 'Water-resistant nylon backpack with padded laptop sleeve for up to 15.6-inch laptops and organized interior pockets.',
+    features: [
+      'Padded sleeve fits up to 15.6" laptop',
+      'Water-repellent polyester fabric',
+      'Hidden anti-theft back pocket',
+      'Breathable padded shoulder straps'
+    ],
+    specs: {
+      'Capacity': '24 Liters',
+      'Dimensions': '45 x 30 x 15 cm',
+      'Material': 'Water-resistant Polyester',
+      'Weight': '750g'
+    },
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'eco-prod-106',
+    sku: 'AUDIO-SPK-06',
+    name: 'Portable Bluetooth Speaker',
+    category: 'Audio',
+    price: 49.99,
+    originalPrice: 65.00,
+    rating: 4.6,
+    reviewsCount: 73,
+    totalStock: 15,
+    reservedStock: 0,
+    badge: null,
+    image: 'https://images.unsplash.com/photo-1545454675-3531b543be5d?w=600&q=80',
+    description: 'Compact wireless speaker with enhanced bass, IPX7 waterproof rating, and 16 hours of playtime.',
+    features: [
+      '16W stereo sound with dual bass drivers',
+      'IPX7 waterproof rating (can be submerged)',
+      '16 hours continuous playtime',
+      'Built-in carrying strap'
+    ],
+    specs: {
+      'Power': '16W RMS',
+      'Battery': '3600mAh',
+      'Waterproof': 'IPX7',
+      'Weight': '450g'
+    },
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'eco-prod-107',
+    sku: 'PWR-CHG-07',
+    name: '65W USB-C Fast Wall Charger',
+    category: 'Accessories',
+    price: 32.99,
+    originalPrice: 42.00,
+    rating: 4.9,
+    reviewsCount: 190,
+    totalStock: 30,
+    reservedStock: 0,
+    badge: 'Popular',
+    image: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=600&q=80',
+    description: 'Compact GaN fast charger with 2x USB-C and 1x USB-A ports. Compatible with laptops, tablets, and phones.',
+    features: [
+      '65W GaN fast charging technology',
+      '3 ports (2x USB-C, 1x USB-A)',
+      'Foldable plug for easy travel',
+      'Over-voltage and temperature protection'
+    ],
+    specs: {
+      'Max Power': '65W',
+      'Ports': '2 USB-C + 1 USB-A',
+      'Technology': 'GaN III',
+      'Weight': '130g'
+    },
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'eco-prod-108',
+    sku: 'LFE-BOTL-08',
+    name: 'Insulated Stainless Steel Water Bottle',
+    category: 'Accessories',
+    price: 22.00,
+    originalPrice: 28.00,
+    rating: 4.5,
+    reviewsCount: 38,
+    totalStock: 3,
+    reservedStock: 0,
+    badge: 'Only 3 Left',
+    image: 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=600&q=80',
+    description: 'Double-wall vacuum insulated stainless steel bottle (750ml). Keeps drinks cold for 24 hours or hot for 12 hours.',
+    features: [
+      'Keeps cold for 24h, hot for 12h',
+      'Food-grade 18/8 stainless steel',
+      'Leak-proof screw cap',
+      'BPA-free and condensation-free'
+    ],
+    specs: {
+      'Volume': '750ml (25 oz)',
+      'Material': '18/8 Stainless Steel',
+      'Insulation': 'Double-wall vacuum',
+      'Weight': '350g'
+    },
+    createdAt: new Date().toISOString()
+  }
+];
+
+async function seedStorefront(force = false) {
+  const current = await db.read(data => data.products);
+  if (!current || current.length === 0 || force) {
+    console.log('[Storefront] Seeding initial product catalog...');
+    await db.reset({
+      products: initialCatalog,
+      orders: [],
+      payments: [],
+      refunds: []
+    });
+    console.log('[Storefront] Catalog seeded with realistic products.');
+  }
+}
+
+module.exports = { seedStorefront, initialCatalog };

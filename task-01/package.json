@@ -1,0 +1,31 @@
+{
+  "name": "task-01-pos-concurrency-system",
+  "version": "1.0.0",
+  "description": "Techloom.ai Practical Assessment - Concurrency-Safe POS Order & Inventory System",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js",
+    "test": "npm run test:all",
+    "test:concurrency": "node tests/concurrency.test.js",
+    "test:timeout": "node tests/reservation-timeout.test.js",
+    "test:idempotency": "node tests/idempotency.test.js",
+    "test:all": "node tests/concurrency.test.js && node tests/reservation-timeout.test.js && node tests/idempotency.test.js"
+  },
+  "keywords": [
+    "pos",
+    "concurrency",
+    "inventory",
+    "idempotency",
+    "stock-reservation"
+  ],
+  "author": "Techloom Candidate",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "morgan": "^1.10.0",
+    "uuid": "^11.1.0"
+  }
+}

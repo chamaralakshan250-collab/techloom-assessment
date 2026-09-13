@@ -1,0 +1,22 @@
+{
+  "name": "techloom-intern-assessment",
+  "version": "1.0.0",
+  "description": "Techloom.ai Software Engineer Intern Practical Assessment - Sections 01 & 02",
+  "scripts": {
+    "start:task-01": "cd task-01 && npm start",
+    "start:task-02": "cd task-02 && npm start",
+    "test:task-01": "cd task-01 && npm test",
+    "test:task-02": "cd task-02 && npm test",
+    "test:all": "cd task-01 && npm test && cd ../task-02 && npm test"
+  },
+  "keywords": [
+    "techloom",
+    "pos",
+    "ecommerce",
+    "concurrency",
+    "idempotency",
+    "stock-reservation"
+  ],
+  "author": "Techloom Candidate",
+  "license": "ISC"
+}

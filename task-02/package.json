@@ -1,0 +1,26 @@
+{
+  "name": "task-02-ecommerce-checkout-system",
+  "version": "1.0.0",
+  "description": "Techloom.ai Practical Assessment - E-Commerce Checkout & Payment System",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js",
+    "test": "node tests/e2e-checkout.test.js"
+  },
+  "keywords": [
+    "ecommerce",
+    "checkout",
+    "payment-gateway",
+    "stock-reservation",
+    "refunds"
+  ],
+  "author": "Techloom Candidate",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "uuid": "^11.1.0"
+  }
+}
