@@ -56,9 +56,16 @@ app.get('/api/health', (req, res) => {
 // SPA fallback
 app.use((req, res, next) => {
   if (req.method === 'GET' && !req.path.startsWith('/api')) {
-    const indexHtml = path.join(publicPath, 'index.html');
-    if (fs.existsSync(indexHtml)) {
-      return res.sendFile(indexHtml);
+    const candidates = [
+      path.join(publicPath, 'index.html'),
+      path.join(__dirname, '..', 'index.html'),
+      path.join(process.cwd(), 'public', 'index.html'),
+      path.join(process.cwd(), 'index.html')
+    ];
+    for (const p of candidates) {
+      if (fs.existsSync(p)) {
+        return res.sendFile(p);
+      }
     }
   }
   next();
