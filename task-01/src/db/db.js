@@ -116,7 +116,9 @@ class TransactionalDatabase {
   }
 }
 
-const dbPath = path.join(__dirname, '..', '..', 'data', 'pos_db.json');
+const dbPath = process.env.VERCEL
+  ? path.join('/tmp', 'pos_db.json')
+  : (process.env.DB_PATH || path.join(__dirname, '..', '..', 'data', 'pos_db.json'));
 const db = new TransactionalDatabase(dbPath);
 
 module.exports = db;

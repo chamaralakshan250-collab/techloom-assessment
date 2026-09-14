@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Techloom POS - Concurrency-Safe Inventory & Order System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app" class="app-container">
+    <!-- TOP NAVIGATION -->
+    <header class="navbar">
+      <div class="nav-brand">
+        <div class="brand-logo"><i class="fa-solid fa-layer-group"></i></div>
+        <div>
+          <h1 class="brand-title">Techloom POS</h1>
+          <span class="brand-subtitle">Concurrency-Safe Engine &middot; Task 01</span>
+        </div>
+      </div>
+
+      <nav class="nav-tabs">
+        <button class="nav-tab active" data-tab="pos">
+          <i class="fa-solid fa-cash-register"></i> Register &amp; Cart
+        </button>
+        <button class="nav-tab" data-tab="inventory">
+          <i class="fa-solid fa-boxes-stacked"></i> Inventory CRUD
+        </button>
+        <button class="nav-tab" data-tab="orders">
+          <i class="fa-solid fa-clock-rotate-left"></i> Order Lifecycle
+          <span class="badge" id="order-count-badge">0</span>
+        </button>
+        <button class="nav-tab highlight" data-tab="stress-test">
+          <i class="fa-solid fa-bolt-lightning"></i> Concurrency Stress Lab
+        </button>
+      </nav>
+
+      <div class="nav-actions">
+        <div class="system-status">
+          <span class="status-dot"></span>
+          <span class="status-text">ACID Mode Active</span>
+        </div>
+        <button id="btn-reset-db" class="btn btn-outline" title="Reset to initial seed products">
+          <i class="fa-solid fa-arrows-rotate"></i> Reset DB
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      
+      <!-- TAB 1: POS REGISTER -->
+      <section id="tab-pos" class="tab-pane active">
+        <div class="pos-layout">
+          <!-- Left: Product Catalog -->
+          <div class="catalog-section">
+            <div class="catalog-header">
+              <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="pos-search-input" placeholder="Search products by name or SKU...">
+              </div>
+              <div class="category-pills" id="category-pills">
+                <button class="pill active" data-category="ALL">All Items</button>
+                <button class="pill" data-category="Beverages">Beverages</button>
+                <button class="pill" data-category="Bakery">Bakery</button>
+                <button class="pill" data-category="Food">Food</button>
+                <button class="pill" data-category="Merchandise">Merchandise</button>
+                <button class="pill" data-category="Electronics">Electronics</button>
+              </div>
+            </div>
+
+            <div class="products-grid" id="pos-products-grid">
+              <!-- Products injected via JS -->
+            </div>
+          </div>
+
+          <!-- Right: Cart & Reservation Panel -->
+          <div class="cart-panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <i class="fa-solid fa-basket-shopping"></i> Current Cart
+              </div>
+              <button id="btn-clear-cart" class="btn-link text-danger"><i class="fa-regular fa-trash-can"></i> Clear</button>
+            </div>
+
+            <!-- Customer Info -->
+            <div class="customer-info-box">
+              <input type="text" id="customer-name-input" placeholder="Customer Name (e.g. John Doe)" value="Walk-in Customer">
+            </div>
+
+            <!-- Cart Items List -->
+            <div class="cart-items" id="cart-items-container">
+              <div class="empty-cart-state">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <p>Cart is empty</p>
+                <small>Select products from catalog to start an order</small>
+              </div>
+            </div>
+
+            <!-- Active Reservation Timer Banner (when reserved) -->
+            <div id="reservation-banner" class="reservation-banner hidden">
+              <div class="banner-top">
+                <div class="timer-display">
+                  <i class="fa-solid fa-stopwatch animate-pulse"></i>
+                  <span>Stock Reserved: <strong id="reservation-timer">05:00</strong></span>
+                </div>
+                <span class="badge badge-warning">Expires in 5 mins</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="reservation-progress" style="width: 100%;"></div>
+              </div>
+              <small class="text-muted">Stock is temporarily locked for this checkout session.</small>
+            </div>
+
+            <!-- Cart Summary & Actions -->
+            <div class="cart-summary">
+              <div class="summary-row">
+                <span>Subtotal</span>
+                <span id="cart-subtotal">$0.00</span>
+              </div>
+              <div class="summary-row">
+                <span>Tax (0%)</span>
+                <span>$0.00</span>
+              </div>
+              <div class="summary-row total">
+                <span>Total Amount</span>
+                <span id="cart-total">$0.00</span>
+              </div>
+
+              <!-- Action buttons -->
+              <div class="cart-actions-group">
+                <!-- Step 1: Reserve Stock -->
+                <button id="btn-reserve-checkout" class="btn btn-primary btn-block">
+                  <i class="fa-solid fa-lock"></i> Reserve Stock &amp; Proceed
+                </button>
+
+                <!-- Step 2: Payment Trigger (shown when reserved) -->
+                <button id="btn-open-payment" class="btn btn-success btn-block hidden">
+                  <i class="fa-solid fa-credit-card"></i> Process Payment Gateway
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: INVENTORY CRUD -->
+      <section id="tab-inventory" class="tab-pane">
+        <div class="inventory-container">
+          <div class="section-header">
+            <div>
+              <h2>Inventory &amp; Product Management</h2>
+              <p class="text-muted">Manage products, inspect total vs reserved stock in real-time</p>
+            </div>
+            <button id="btn-add-product-modal" class="btn btn-primary">
+              <i class="fa-solid fa-plus"></i> Add New Product
+            </button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table" id="inventory-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>SKU</th>
+                  <th>Category</th>
+                  <th>Unit Price</th>
+                  <th>Total Stock</th>
+                  <th>Reserved (Locked)</th>
+                  <th>Available Stock</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="inventory-tbody">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: ORDER LIFECYCLE -->
+      <section id="tab-orders" class="tab-pane">
+        <div class="orders-container">
+          <div class="section-header">
+            <div>
+              <h2>Order Lifecycle &amp; Transactions</h2>
+              <p class="text-muted">Track order transitions (Pending &rarr; Reserved &rarr; Paid / Cancelled / Expired / Failed)</p>
+            </div>
+            <div class="filter-group">
+              <button class="pill active order-filter-btn" data-filter="ALL">All</button>
+              <button class="pill order-filter-btn" data-filter="RESERVED">Reserved</button>
+              <button class="pill order-filter-btn" data-filter="PAID">Paid</button>
+              <button class="pill order-filter-btn" data-filter="CANCELLED">Cancelled</button>
+              <button class="pill order-filter-btn" data-filter="EXPIRED">Expired</button>
+              <button class="pill order-filter-btn" data-filter="FAILED">Failed</button>
+            </div>
+          </div>
+
+          <div class="orders-grid" id="orders-list-grid">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: CONCURRENCY STRESS LAB -->
+      <section id="tab-stress-test" class="tab-pane">
+        <div class="stress-lab-container">
+          <div class="stress-banner">
+            <div class="stress-badge"><i class="fa-solid fa-shield-halved"></i> Concurrency Benchmark Lab</div>
+            <h2>Simulate Simultaneous Flash-Sale Purchase Requests</h2>
+            <p>Demonstrate zero-overselling under concurrent load by firing parallel asynchronous requests against a limited-stock item.</p>
+          </div>
+
+          <div class="stress-config-grid">
+            <div class="config-card">
+              <label>Select Target Product:</label>
+              <select id="stress-product-select" class="form-control">
+                <!-- Injected via JS -->
+              </select>
+              <div class="stock-preview-box" id="stress-product-preview">
+                Loading stock preview...
+              </div>
+            </div>
+
+            <div class="config-card">
+              <label>Number of Simultaneous Requests:</label>
+              <div class="input-with-buttons">
+                <button class="btn-num" onclick="setConcurrentReq(10)">10</button>
+                <button class="btn-num active" onclick="setConcurrentReq(25)">25</button>
+                <button class="btn-num" onclick="setConcurrentReq(50)">50</button>
+                <input type="number" id="stress-req-count" class="form-control" value="25" min="1" max="100">
+              </div>
+              <small class="text-muted">All requests are dispatched simultaneously via Promise.all.</small>
+            </div>
+
+            <div class="config-card action-card">
+              <button id="btn-run-stress-test" class="btn btn-warning btn-lg btn-block">
+                <i class="fa-solid fa-bolt"></i> Launch Concurrency Stress Test
+              </button>
+              <small>Validates ACID transaction locks &amp; atomic stock reservation.</small>
+            </div>
+          </div>
+
+          <!-- Stress Test Results Dashboard -->
+          <div id="stress-results-panel" class="stress-results-panel hidden">
+            <h3><i class="fa-solid fa-chart-pie"></i> Benchmark Execution Results</h3>
+            
+            <div class="metrics-row">
+              <div class="metric-card">
+                <span class="metric-label">Total Requests</span>
+                <span class="metric-val" id="metric-total">0</span>
+              </div>
+              <div class="metric-card success">
+                <span class="metric-label">Successful Locks (201)</span>
+                <span class="metric-val" id="metric-success">0</span>
+              </div>
+              <div class="metric-card warning">
+                <span class="metric-label">Rejected / Conflict (409)</span>
+                <span class="metric-val" id="metric-rejected">0</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-label">Execution Time</span>
+                <span class="metric-val" id="metric-time">0ms</span>
+              </div>
+              <div class="metric-card highlight">
+                <span class="metric-label">Oversell Anomaly</span>
+                <span class="metric-val" id="metric-oversold">NONE (0%)</span>
+              </div>
+            </div>
+
+            <!-- Detailed request breakdown logs -->
+            <div class="stress-logs-box">
+              <div class="logs-header">Concurrent Request Log Feed:</div>
+              <div class="logs-stream" id="stress-logs-stream"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- MODAL: PAYMENT GATEWAY SIMULATION -->
+    <div id="modal-payment" class="modal-backdrop hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title">
+            <i class="fa-solid fa-satellite-dish"></i> Mock Payment Gateway Simulator
+          </div>
+          <button class="btn-close" onclick="closeModal('modal-payment')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="payment-order-summary">
+            <p><strong>Order ID:</strong> <span id="modal-pay-order-id">-</span></p>
+            <p><strong>Customer:</strong> <span id="modal-pay-customer">-</span></p>
+            <p><strong>Amount Due:</strong> <span class="text-accent" id="modal-pay-amount">$0.00</span></p>
+            <p><strong>Idempotency Key:</strong> <code id="modal-pay-idemp-key">-</code></p>
+          </div>
+
+          <p class="section-label">Select Payment Simulation Outcome:</p>
+          <div class="payment-options-grid">
+            <button class="pay-option-btn success" onclick="handleSimulatePayment('SUCCESS')">
+              <i class="fa-solid fa-circle-check"></i>
+              <div>
+                <strong>Simulate Success</strong>
+                <small>Confirms order (PAID), permanently deducts stock.</small>
+              </div>
+            </button>
+
+            <button class="pay-option-btn failure" onclick="handleSimulatePayment('FAILURE')">
+              <i class="fa-solid fa-circle-xmark"></i>
+              <div>
+                <strong>Simulate Gateway Failure</strong>
+                <small>Declines transaction (FAILED), releases reserved stock.</small>
+              </div>
+            </button>
+
+            <button class="pay-option-btn timeout" onclick="handleSimulatePayment('TIMEOUT')">
+              <i class="fa-solid fa-hourglass-end"></i>
+              <div>
+                <strong>Simulate Gateway Timeout</strong>
+                <small>Connection times out (EXPIRED), frees locked stock.</small>
+              </div>
+            </button>
+
+            <button class="pay-option-btn duplicate" onclick="handleSimulateDuplicatePayment()">
+              <i class="fa-solid fa-clone"></i>
+              <div>
+                <strong>Simulate Duplicate Submission</strong>
+                <small>Fires 2 identical requests with same Idempotency Key.</small>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: ADD / EDIT PRODUCT -->
+    <div id="modal-product" class="modal-backdrop hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title" id="modal-product-title">Add New Product</div>
+          <button class="btn-close" onclick="closeModal('modal-product')">&times;</button>
+        </div>
+        <form id="form-product" class="modal-body">
+          <input type="hidden" id="prod-form-id">
+          <div class="form-group">
+            <label>Product Name</label>
+            <input type="text" id="prod-form-name" class="form-control" required placeholder="e.g. Vanilla Cold Brew">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>SKU</label>
+              <input type="text" id="prod-form-sku" class="form-control" placeholder="e.g. BEV-COLD-01">
+            </div>
+            <div class="form-group">
+              <label>Category</label>
+              <select id="prod-form-category" class="form-control">
+                <option value="Beverages">Beverages</option>
+                <option value="Bakery">Bakery</option>
+                <option value="Food">Food</option>
+                <option value="Merchandise">Merchandise</option>
+                <option value="Electronics">Electronics</option>
+                <option value="General">General</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Unit Price ($)</label>
+              <input type="number" step="0.01" id="prod-form-price" class="form-control" required placeholder="4.50" min="0">
+            </div>
+            <div class="form-group">
+              <label>Total Inventory Stock</label>
+              <input type="number" id="prod-form-stock" class="form-control" required placeholder="50" min="0">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Image URL</label>
+            <input type="url" id="prod-form-image" class="form-control" placeholder="https://images.unsplash.com/...">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeModal('modal-product')">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Product</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="toast-container"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
