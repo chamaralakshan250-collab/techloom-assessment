@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Techloom Store - E-Commerce Checkout & Payment System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app" class="app-root">
+    
+    <!-- TOP ANNOUNCEMENT BANNER -->
+    <div class="top-announcement">
+      <span>Free shipping on all orders over $100 &bull; 5-minute stock hold at checkout</span>
+      <button class="banner-link" onclick="switchView('orders')">Order History &rarr;</button>
+    </div>
+
+    <!-- MAIN NAVBAR -->
+    <header class="store-nav">
+      <div class="nav-container">
+        <!-- Brand -->
+        <div class="nav-brand" onclick="switchView('catalog')">
+          <div class="brand-badge"><i class="fa-solid fa-store"></i></div>
+          <div>
+            <span class="brand-name">Techloom<span class="brand-accent">Store</span></span>
+            <span class="brand-tagline">Electronics &amp; Lifestyle Gear</span>
+          </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="nav-search-wrapper">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input type="text" id="store-search-input" placeholder="Search by product name, category, or SKU...">
+          <button id="search-clear-btn" class="search-clear hidden">&times;</button>
+        </div>
+
+        <!-- Right Nav Actions -->
+        <div class="nav-right">
+          <button class="nav-btn active" onclick="switchView('catalog')" id="nav-btn-catalog">
+            <i class="fa-solid fa-grid-2"></i> <span>Catalog</span>
+          </button>
+          
+          <button class="nav-btn" onclick="switchView('orders')" id="nav-btn-orders">
+            <i class="fa-solid fa-clock-rotate-left"></i> <span>My Orders</span>
+            <span class="badge-dot hidden" id="orders-has-badge"></span>
+          </button>
+
+          <!-- Cart Button -->
+          <button class="cart-trigger-btn" id="btn-open-cart">
+            <div class="cart-icon-wrap">
+              <i class="fa-solid fa-cart-shopping"></i>
+              <span class="cart-count-badge" id="nav-cart-count">0</span>
+            </div>
+            <span class="cart-btn-amount" id="nav-cart-total">$0.00</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- VIEW 1: CATALOG & PRODUCT DISCOVERY -->
+    <main id="view-catalog" class="store-view active">
+      
+      <!-- HERO BANNER -->
+      <section class="store-hero">
+        <div class="hero-content">
+          <h1 class="hero-title">Quality Electronics &amp; Everyday Essentials</h1>
+          <p class="hero-desc">Browse our collection of audio gear, smart accessories, and desk peripherals. Powered by real-time inventory management.</p>
+          <div class="hero-features">
+            <div class="feat-item"><i class="fa-solid fa-lock"></i> 5-Min Stock Reservation</div>
+            <div class="feat-dot">&bull;</div>
+            <div class="feat-item"><i class="fa-solid fa-shield-halved"></i> Concurrency-Safe Checkout</div>
+            <div class="feat-dot">&bull;</div>
+            <div class="feat-item"><i class="fa-solid fa-arrow-rotate-left"></i> Instant Refund Simulation</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CATALOG CONTAINER (FILTERS + GRID) -->
+      <div class="catalog-layout">
+        
+        <!-- SIDEBAR FILTERS -->
+        <aside class="catalog-sidebar">
+          <div class="sidebar-card">
+            <div class="sidebar-header">
+              <h3><i class="fa-solid fa-sliders"></i> Filters</h3>
+              <button class="btn-text" id="btn-reset-filters">Clear All</button>
+            </div>
+
+            <!-- Categories -->
+            <div class="filter-block">
+              <label class="filter-label">Category</label>
+              <div class="category-radio-group" id="category-filter-group">
+                <label class="cat-radio-label active">
+                  <input type="radio" name="category" value="ALL" checked>
+                  <span>All Items</span>
+                </label>
+                <label class="cat-radio-label">
+                  <input type="radio" name="category" value="Audio">
+                  <span>Audio &amp; Headphones</span>
+                </label>
+                <label class="cat-radio-label">
+                  <input type="radio" name="category" value="Wearables">
+                  <span>Wearables &amp; Fitness</span>
+                </label>
+                <label class="cat-radio-label">
+                  <input type="radio" name="category" value="Peripherals">
+                  <span>Keyboards &amp; Desk</span>
+                </label>
+                <label class="cat-radio-label">
+                  <input type="radio" name="category" value="Photography">
+                  <span>Cameras &amp; Lenses</span>
+                </label>
+                <label class="cat-radio-label">
+                  <input type="radio" name="category" value="Accessories">
+                  <span>Accessories &amp; Power</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Price Slider -->
+            <div class="filter-block">
+              <div class="filter-label-row">
+                <span class="filter-label">Max Price</span>
+                <span class="filter-value-pill" id="price-display-val">$600</span>
+              </div>
+              <input type="range" id="price-slider" min="30" max="600" step="10" value="600" class="range-slider">
+              <div class="slider-ticks">
+                <span>$30</span>
+                <span>$300</span>
+                <span>$600</span>
+              </div>
+            </div>
+
+            <!-- Availability -->
+            <div class="filter-block">
+              <label class="checkbox-container">
+                <input type="checkbox" id="instock-checkbox">
+                <span>In Stock Only</span>
+              </label>
+            </div>
+
+            <!-- Sort By -->
+            <div class="filter-block">
+              <label class="filter-label">Sort By</label>
+              <select id="sort-select" class="form-select">
+                <option value="featured">Featured</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="rating">Highest Rated</option>
+                <option value="newest">Newest</option>
+              </select>
+            </div>
+          </div>
+        </aside>
+
+        <!-- PRODUCTS CATALOG GRID -->
+        <section class="catalog-main">
+          <div class="catalog-status-bar">
+            <span class="catalog-count-text" id="catalog-count-display">Showing 8 products</span>
+            <button class="btn btn-outline-sm" id="btn-seed-reset" title="Reset catalog to seed products">
+              <i class="fa-solid fa-rotate-right"></i> Reset Catalog
+            </button>
+          </div>
+
+          <div class="store-products-grid" id="store-products-grid">
+            <!-- Injected via JS -->
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- VIEW 2: ORDER HISTORY & REFUNDS -->
+    <main id="view-orders" class="store-view">
+      <div class="orders-page-container">
+        <div class="orders-page-header">
+          <div>
+            <h2>Order History &amp; Refunds</h2>
+            <p class="text-muted">Track past orders, view payment status, and simulate refunds for cancelled orders.</p>
+          </div>
+          
+          <div class="email-lookup-box">
+            <input type="email" id="order-search-email" placeholder="Customer email (e.g. alex.shopper@techloom.ai)">
+            <button class="btn btn-primary" id="btn-search-orders">Filter</button>
+          </div>
+        </div>
+
+        <div class="orders-timeline" id="orders-timeline-container">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+    </main>
+
+    <!-- CART SLIDE-OVER DRAWER -->
+    <div id="cart-drawer-overlay" class="drawer-backdrop hidden">
+      <div class="cart-drawer">
+        <div class="drawer-header">
+          <div class="drawer-title">
+            <i class="fa-solid fa-cart-shopping"></i> Shopping Cart (<span id="drawer-item-count">0</span>)
+          </div>
+          <button class="btn-drawer-close" id="btn-close-cart">&times;</button>
+        </div>
+
+        <!-- Free Shipping Progress -->
+        <div class="shipping-meter-box">
+          <div class="meter-text" id="shipping-meter-text">Add $100.00 for Free Shipping</div>
+          <div class="meter-bar">
+            <div class="meter-fill" id="shipping-meter-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- Cart Items List -->
+        <div class="drawer-items-list" id="drawer-items-container">
+          <!-- Injected via JS -->
+        </div>
+
+        <!-- Drawer Footer & Checkout Action -->
+        <div class="drawer-footer">
+          <div class="drawer-summary-row">
+            <span>Subtotal</span>
+            <span id="drawer-subtotal">$0.00</span>
+          </div>
+          <div class="drawer-summary-row">
+            <span>Shipping</span>
+            <span id="drawer-shipping">$9.99</span>
+          </div>
+          <div class="drawer-summary-row total">
+            <span>Total</span>
+            <span id="drawer-total">$0.00</span>
+          </div>
+
+          <button id="btn-start-checkout" class="btn btn-primary btn-block btn-lg">
+            Proceed to Checkout
+          </button>
+          <small class="drawer-lock-notice">Stock is reserved for 5 minutes during checkout</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: PRODUCT DETAILS VIEW -->
+    <div id="modal-quickview" class="modal-backdrop hidden">
+      <div class="modal-card modal-lg">
+        <button class="btn-modal-close" onclick="closeModal('modal-quickview')">&times;</button>
+        <div class="product-modal-grid" id="product-modal-content">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: CHECKOUT & PAYMENT GATEWAY SIMULATOR -->
+    <div id="modal-checkout" class="modal-backdrop hidden">
+      <div class="modal-card modal-checkout-card">
+        <div class="checkout-header">
+          <div class="checkout-title">
+            <i class="fa-solid fa-credit-card"></i> Checkout &amp; Payment
+          </div>
+          <button class="btn-modal-close" onclick="closeModal('modal-checkout')">&times;</button>
+        </div>
+
+        <div class="checkout-body">
+          
+          <!-- Reservation Countdown Alert -->
+          <div class="reservation-alert-box">
+            <div class="res-alert-top">
+              <div class="res-timer">
+                <i class="fa-solid fa-clock"></i>
+                <span>Stock Reserved: <strong id="checkout-timer-text">05:00</strong></span>
+              </div>
+              <span class="badge badge-warning" id="checkout-order-badge">ORD-PENDING</span>
+            </div>
+            <div class="res-progress-track">
+              <div class="res-progress-bar" id="checkout-progress-bar" style="width: 100%;"></div>
+            </div>
+            <p class="res-notice">Items are reserved for 5 minutes. If unpaid, stock is automatically released.</p>
+          </div>
+
+          <!-- Customer & Order Overview -->
+          <div class="checkout-split">
+            <div class="checkout-form-col">
+              <h4>Shipping Details</h4>
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="checkout-email" class="form-control" value="alex.shopper@techloom.ai">
+              </div>
+              <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="checkout-name" class="form-control" value="Alex Mercer">
+              </div>
+              <div class="form-group">
+                <label>Address</label>
+                <input type="text" id="checkout-address" class="form-control" value="742 Evergreen Terrace, Springfield">
+              </div>
+            </div>
+
+            <div class="checkout-order-col">
+              <h4>Order Summary</h4>
+              <div class="checkout-summary-box">
+                <div class="summary-line">
+                  <span>Subtotal</span>
+                  <span id="co-subtotal">$0.00</span>
+                </div>
+                <div class="summary-line">
+                  <span>Shipping</span>
+                  <span id="co-shipping">$0.00</span>
+                </div>
+                <div class="summary-line total">
+                  <span>Total Amount</span>
+                  <span id="co-total" class="text-accent">$0.00</span>
+                </div>
+                <div class="summary-idemp">
+                  Idempotency Key: <code id="co-idemp-key">-</code>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment Simulator Gateway Triggers -->
+          <div class="gateway-simulator-section">
+            <h4>Mock Payment Gateway</h4>
+            <p class="text-muted">Simulate different gateway responses to test status updates and stock handling:</p>
+            
+            <div class="gateway-buttons-grid">
+              <button class="gateway-btn success" onclick="executeCheckoutPayment('SUCCESS')">
+                <i class="fa-solid fa-circle-check"></i>
+                <div>
+                  <strong>Simulate Success</strong>
+                  <span>Mark as PAID and permanently deduct inventory</span>
+                </div>
+              </button>
+
+              <button class="gateway-btn failure" onclick="executeCheckoutPayment('FAILURE')">
+                <i class="fa-solid fa-circle-xmark"></i>
+                <div>
+                  <strong>Simulate Card Declined</strong>
+                  <span>Mark as FAILED and release reserved stock</span>
+                </div>
+              </button>
+
+              <button class="gateway-btn timeout" onclick="executeCheckoutPayment('TIMEOUT')">
+                <i class="fa-solid fa-hourglass-end"></i>
+                <div>
+                  <strong>Simulate Gateway Timeout</strong>
+                  <span>Simulate stalled connection and release stock</span>
+                </div>
+              </button>
+
+              <button class="gateway-btn duplicate" onclick="executeDuplicateCheckoutPayment()">
+                <i class="fa-solid fa-clone"></i>
+                <div>
+                  <strong>Test Duplicate Payment</strong>
+                  <span>Send 2 concurrent requests with same Idempotency Key</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: ORDER SUCCESS RECEIPT -->
+    <div id="modal-receipt" class="modal-backdrop hidden">
+      <div class="modal-card receipt-card">
+        <div class="receipt-icon"><i class="fa-solid fa-circle-check"></i></div>
+        <h2>Order Confirmed</h2>
+        <p class="receipt-subtitle">Your payment was processed successfully.</p>
+
+        <div class="receipt-details" id="receipt-details-box">
+          <!-- Injected via JS -->
+        </div>
+
+        <div class="receipt-actions">
+          <button class="btn btn-outline" onclick="closeModal('modal-receipt'); switchView('orders');">
+            View in Order History
+          </button>
+          <button class="btn btn-primary" onclick="closeModal('modal-receipt'); switchView('catalog');">
+            Continue Shopping
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toast-container" class="toast-container"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
