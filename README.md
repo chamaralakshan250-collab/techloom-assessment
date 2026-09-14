@@ -10,8 +10,8 @@ This repository contains the complete, production-ready implementation for **bot
 ## 🔗 Live Deployment & Repository Links
 
 - **Public GitHub Repository**: `https://github.com/chamaralakshan250-collab/techloom-assessment`
-- **Task 01 Live POS App**: `https://techloom-task01-pos.onrender.com` *(or your deployment URL)*
-- **Task 02 Live Storefront**: `https://techloom-task02-store.onrender.com` *(or your deployment URL)*
+- **Task 01 Live POS App**: `https://techloom-assessment-sand.vercel.app`
+- **Task 02 Live Storefront**: `https://techloom-task-02-nine.vercel.app`
 
 ---
 
