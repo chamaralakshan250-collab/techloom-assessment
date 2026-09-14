@@ -63,9 +63,16 @@ class TransactionalDatabase {
       } catch (err) {
         console.error('Error loading DB file, reinitializing:', err);
       }
-    } else {
-      this.save();
     }
+    if (!this.data.products || this.data.products.length === 0) {
+      try {
+        const { initialProducts } = require('./seed');
+        this.data.products = initialProducts;
+      } catch (err) {
+        console.error('Error loading initial products:', err);
+      }
+    }
+    this.save();
   }
 
   save() {

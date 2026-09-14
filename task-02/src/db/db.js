@@ -63,9 +63,16 @@ class StorefrontDatabase {
       } catch (err) {
         console.error('Error loading Storefront DB:', err);
       }
-    } else {
-      this.save();
     }
+    if (!this.data.products || this.data.products.length === 0) {
+      try {
+        const { initialCatalog } = require('./seed');
+        this.data.products = initialCatalog;
+      } catch (err) {
+        console.error('Error loading initial catalog:', err);
+      }
+    }
+    this.save();
   }
 
   save() {
