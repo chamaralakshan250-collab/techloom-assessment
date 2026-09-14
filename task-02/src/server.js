@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
 const { seedStorefront } = require('./db/seed');
@@ -56,7 +57,9 @@ app.get('/api/health', (req, res) => {
 app.use((req, res, next) => {
   if (req.method === 'GET' && !req.path.startsWith('/api')) {
     const indexHtml = path.join(publicPath, 'index.html');
-    return res.sendFile(indexHtml);
+    if (fs.existsSync(indexHtml)) {
+      return res.sendFile(indexHtml);
+    }
   }
   next();
 });

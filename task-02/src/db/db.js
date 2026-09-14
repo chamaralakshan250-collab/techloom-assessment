@@ -66,8 +66,8 @@ class StorefrontDatabase {
     }
     if (!this.data.products || this.data.products.length === 0) {
       try {
-        const { initialCatalog } = require('./seed');
-        this.data.products = initialCatalog;
+        const initialCatalog = require('./initialCatalog');
+        this.data.products = JSON.parse(JSON.stringify(initialCatalog));
       } catch (err) {
         console.error('Error loading initial catalog:', err);
       }
