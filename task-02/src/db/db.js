@@ -111,7 +111,9 @@ class StorefrontDatabase {
   }
 }
 
-const dbPath = path.join(__dirname, '..', '..', 'data', 'store_db.json');
+const dbPath = process.env.VERCEL
+  ? path.join('/tmp', 'store_db.json')
+  : (process.env.DB_PATH || path.join(__dirname, '..', '..', 'data', 'store_db.json'));
 const db = new StorefrontDatabase(dbPath);
 
 module.exports = db;
