@@ -1,4 +1,4 @@
-# 🚀 Techloom.ai &mdash; Software Engineer Intern Practical Assessment
+Techloom.ai &mdash; Software Engineer Intern Practical Assessment
 
 This repository contains the complete, production-ready implementation for **both sections** of the **Techloom.ai Software Engineer Intern Assessment**:
 
@@ -15,7 +15,7 @@ This repository contains the complete, production-ready implementation for **bot
 
 ---
 
-## 📂 Repository Structure
+ Repository Structure
 
 ```tree
 .
@@ -48,7 +48,7 @@ This repository contains the complete, production-ready implementation for **bot
 
 ---
 
-## 🏗️ Architecture & Concurrency Strategy
+Architecture & Concurrency Strategy
 
 ### How Concurrency Safety & Zero Overselling is Achieved
 1. **Critical Section Serialization**: Read-modify-write operations for inventory are guarded by thread-safe mutex transaction locks.
@@ -69,7 +69,7 @@ This repository contains the complete, production-ready implementation for **bot
 
 ---
 
-## ⚡ Quick Start & Local Setup
+Quick Start & Local Setup
 
 ### Prerequisites
 - [Node.js](https://nodejs.org/) (v18.0.0 or higher)
@@ -87,7 +87,7 @@ cd task-01
 npm install
 npm start
 ```
-- 🌐 Open POS Dashboard: **`http://localhost:5001`**
+Open POS Dashboard: **`http://localhost:5001`**
 
 ### 3. Run Task 02 (E-Commerce Storefront)
 ```bash
@@ -95,7 +95,7 @@ cd task-02
 npm install
 npm start
 ```
-- 🛍️ Open Storefront: **`http://localhost:5002`**
+Open Storefront: **`http://localhost:5002`**
 
 ---
 
@@ -128,7 +128,7 @@ npm test
 
 ---
 
-## 🌐 Live Deployment Instructions
+ Live Deployment Instructions
 
 Both Task 01 and Task 02 are designed with **zero-config standalone portability** and can be deployed directly to free-tier cloud platforms such as **Render**, **Railway**, or **Fly.io**:
 
@@ -147,7 +147,7 @@ Both Task 01 and Task 02 are designed with **zero-config standalone portability*
 
 ---
 
-## 👨‍💻 Candidate Notes & Summary
+ Candidate Notes & Summary
 
 - Both systems were architected from the ground up with clean modular services, separation of concerns, transaction isolation, and rich modern interactive user interfaces.
 - The built-in **Concurrency Stress Lab** in Task 01 allows evaluators to visually trigger and inspect parallel request dispatches in real-time right from their browser.
